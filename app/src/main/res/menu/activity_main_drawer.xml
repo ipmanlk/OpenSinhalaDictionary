@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <group>
+        <item android:title="Information">
+            <menu>
+                <item
+                    android:id="@+id/nav_online"
+                    android:icon="@drawable/globe"
+                    android:title="Online Version" />
+                <item
+                    android:id="@+id/nav_help"
+                    android:icon="@drawable/help"
+                    android:title="Help" />
+            </menu>
+        </item>
+    </group>
+
+    <item android:title="Other">
+        <menu>
+            <item
+                android:id="@+id/nav_share"
+                android:icon="@drawable/ic_menu_share"
+                android:title="Share" />
+            <item
+                android:id="@+id/nav_report"
+                android:icon="@drawable/bug"
+                android:title="Report Bugs" />
+            <item
+                android:id="@+id/nav_source"
+                android:icon="@drawable/source"
+                android:title="Source" />
+            <item
+                android:id="@+id/nav_about"
+                android:icon="@drawable/info"
+                android:title="About" />
+
+        </menu>
+    </item>
+
+</menu>
