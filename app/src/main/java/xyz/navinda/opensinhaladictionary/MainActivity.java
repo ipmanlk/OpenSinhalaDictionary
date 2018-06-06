@@ -38,7 +38,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
 
@@ -55,7 +57,11 @@ public class MainActivity extends AppCompatActivity
     private EditText txtInput;
     private boolean suggest;
     private String inputWord;
-    private String DBname;
+    private ArrayList<String> DBen2snEN = new ArrayList<String>();
+    private ArrayList<String> DBen2snSN = new ArrayList<String>();
+    private ArrayList<String> DBsn2enSN = new ArrayList<String>();
+    private ArrayList<String> DBsn2enEN = new ArrayList<String>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +77,9 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        //Load db to array
+        loadDB();
 
         //Close keyboard when drawer open
         drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
@@ -178,11 +187,13 @@ public class MainActivity extends AppCompatActivity
 
             public void onTextChanged(CharSequence s, int start,
                                       int before, int count) {
+
                 clearMeanings();
                 readySearch();
                 if (!isEmptyOrNull(inputWord)) {
                     suggestWords();
                 }
+
 
             }
         });
@@ -191,9 +202,9 @@ public class MainActivity extends AppCompatActivity
         btnFind.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                closeKeyboard();
-                readySearch();
-                findMeaning();
+               closeKeyboard();
+               readySearch();
+               findMeaning();
             }
         });
 
@@ -211,40 +222,60 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    private void suggestWords(){
-        suggest=true;
+    private void loadDB(){
+        readDB("db/en2sn.txt");
+        readDB("db/sn2en.txt");
+    }
 
-        //Select database
-        selectDB();
-
-        //get suggestions from text file
+    private void readDB(String db) {
         BufferedReader reader;
-        try{
-            reader = new BufferedReader(new InputStreamReader(getAssets().open(DBname), "UTF-8"));
+        try {
+            reader = new BufferedReader(new InputStreamReader(getAssets().open(db), "UTF-8"));
             String line = reader.readLine();
-            String word;
 
-            //no of suggestions to show
-            int suggestionCount=5;
 
-            //Loop through database
-            int suggestionCounter=0;
-            while(line != null){
-                String[] record=line.split("#");
-                word=record[0];
-                if (word.startsWith(inputWord)) {
-                    suggestionCounter+=1;
-                    meanings_list.add(word);
-                    arrayAdapter.notifyDataSetChanged();
-                }
-                if (suggestionCount==suggestionCounter) {
-                    break;
+            while (line != null) {
+                String[] record = line.split("#");
+                if (db.equals("db/en2sn.txt")) {
+                    DBen2snEN.add(record[0]);
+                    DBen2snSN.add(record[1]);
+                } else {
+                    DBsn2enSN.add(record[0]);
+                    DBsn2enEN.add(record[1]);
                 }
                 line = reader.readLine();
             }
-
-        } catch(IOException ioe){
+        } catch (IOException ioe) {
             ioe.printStackTrace();
+        }
+    }
+
+    private void suggestWords(){
+        suggest=true;
+        String suggestion="";
+        int suggestions=0;
+        int suggestionsLimit=8;
+        if (checkLang()) { //If input English
+            for (int i = 0; i < DBen2snEN.size(); i++) {
+                if(DBen2snEN.get(i).startsWith(inputWord)) {
+                    suggestions+=1;
+                    suggestion = DBen2snEN.get(i);
+                    meanings_list.add(suggestion);
+                    arrayAdapter.notifyDataSetChanged();
+                    if (suggestions==suggestionsLimit) {break;}
+                }
+            }
+        } else { //if input is Sinhala
+            System.out.println("me");
+            for (int i = 0; i < DBsn2enSN.size(); i++) {
+                if(DBsn2enSN.get(i).startsWith(inputWord)) {
+                    suggestions+=1;
+                    suggestion = DBsn2enSN.get(i);
+                    meanings_list.add(suggestion);
+                    arrayAdapter.notifyDataSetChanged();
+                    if (suggestions==suggestionsLimit) {break;}
+                }
+            }
         }
     }
 
@@ -258,54 +289,43 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void findMeaning(){
-        //Select database
-        selectDB();
-
-        //Find meaning from text file
-        BufferedReader reader;
-        try{
-            reader = new BufferedReader(new InputStreamReader(getAssets().open(DBname), "UTF-8"));
-            String line = reader.readLine();
-            String word;
-            String foundMeanings;
-            //Loop through database
-            while(line != null){
-                String[] record=line.split("#");
-                word=record[0];
-                foundMeanings=record[1];
-                if (word.equals(inputWord)) {
-                    showMeanings(foundMeanings); //call show meaning
+        String foundMeanings="";
+        if (checkLang()) { //If input English
+            for (int i = 0; i < DBen2snEN.size(); i++) {
+                if(DBen2snEN.get(i).equals(inputWord)) {
+                    foundMeanings = DBen2snSN.get(i);
                     found=true;
                     break;
                 } else {
                     found=false;
                 }
-                line = reader.readLine();
             }
-
-            if (!found){
-                notFound();
+        } else { //if input is Sinhala
+            for (int i = 0; i < DBsn2enSN.size(); i++) {
+                if(DBsn2enSN.get(i).equals(inputWord)) {
+                    foundMeanings = DBsn2enEN.get(i);
+                    found=true;
+                    break;
+                } else {
+                    found=false;
+                }
             }
-
-        } catch(IOException ioe){
-            ioe.printStackTrace();
         }
-        // meanings_list.clear();
-        //arrayAdapter.notifyDataSetChanged();
-    }
 
-    private void selectDB(){
-        if (checkLang()) {
-            DBname="db/en2sn.txt";
+        //if found
+        if (found) {
+            showMeanings(foundMeanings);
         } else {
-            DBname="db/sn2en.txt";
+            notFound();
         }
+
     }
 
     private boolean checkLang() {
         //check input language
         final String IS_ENGLISH_REGEX = "^[A-Za-z0-9- ]+$";
         return inputWord.matches(IS_ENGLISH_REGEX);
+        //English - True, Sinhala-False
     }
 
     private void notFound(){
@@ -334,10 +354,8 @@ public class MainActivity extends AppCompatActivity
         resultWords=resultWords.trim(); //remove spaces
         String[] result=resultWords.split("@"); //seperate meanings by @
         clearMeanings(); //clear output list box
-        for(int i=0; i< result.length; i++){
-            meanings_list.add(result[i]); //add meanings one by one
-        }
-
+        //add meanings one by one
+        meanings_list.addAll(Arrays.asList(result));
         arrayAdapter.notifyDataSetChanged();
     }
 
