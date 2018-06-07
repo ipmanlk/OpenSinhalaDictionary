@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.TypedValue;
@@ -45,14 +46,9 @@ import java.util.TreeMap;
 public class MainActivity extends AppCompatActivity
 
         implements NavigationView.OnNavigationItemSelectedListener {
-    private Context mContext;
-    private Activity mActivity;
-    private ListView mListView;
     private Typeface mTypeface;
-    private String [] meanings;
     private List<String> meanings_list;
     private ArrayAdapter<String> arrayAdapter;
-    private Boolean found=false;
     private Uri url;
     private EditText txtInput;
     private boolean suggest;
@@ -105,24 +101,25 @@ public class MainActivity extends AppCompatActivity
         });
 
         // Get the application context
-        mContext=getApplicationContext();
-        mActivity=MainActivity.this;
+        Context mContext = getApplicationContext();
+        Activity mActivity = MainActivity.this;
 
         // Get the widget reference from XML layout
-        mListView  = (ListView) findViewById(R.id.listOutput);
+        ListView mListView = (ListView) findViewById(R.id.listOutput);
 
         // Initialize a typeface (custom font)
         mTypeface  = Typeface.createFromAsset(getAssets(),"font/malithi_web.ttf");
 
         //Array for meanings
-        meanings=new String[] {};
+        String[] meanings = new String[]{};
         meanings_list = new ArrayList<String>(Arrays.asList(meanings));
 
         //Create array adapter
         arrayAdapter = new ArrayAdapter<String>
                 (this, android.R.layout.simple_list_item_1, meanings_list) {
+            @NonNull
             @Override
-            public View getView(int position, View convertView, ViewGroup parent){
+            public View getView(int position, View convertView, @NonNull ViewGroup parent){
                 // Cast the list view each item as text view
                 TextView item = (TextView) super.getView(position,convertView,parent);
 
@@ -185,14 +182,11 @@ public class MainActivity extends AppCompatActivity
 
             public void onTextChanged(CharSequence s, int start,
                                       int before, int count) {
-
                 clearMeanings();
                 readySearch();
                 if (!isEmptyOrNull(inputWord)) {
                     suggestWords();
                 }
-
-
             }
         });
 
@@ -284,19 +278,20 @@ public class MainActivity extends AppCompatActivity
 
     private void doSearch(){
         String foundMeanings="";
+        Boolean found = false;
         if (checkLang()) { //If input English
             if (DBen2sn.containsKey(inputWord)) {
                 foundMeanings=DBen2sn.get(inputWord);
-                found=true;
+                found =true;
             } else {
-                found=false;
+                found =false;
             }
         } else { //if input is Sinhala
             if (DBsn2en.containsKey(inputWord)) {
                 foundMeanings=DBsn2en.get(inputWord);
-                found=true;
+                found =true;
             } else {
-                found=false;
+                found =false;
             }
         }
 
@@ -315,7 +310,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void notFound(){
-        final String notFoundMsg;
+        String notFoundMsg;
         if(!isEmptyOrNull(inputWord)) {
             notFoundMsg="Definition for '" + inputWord + "' is not included in our database at the moment.";
         } else {
@@ -400,6 +395,7 @@ public class MainActivity extends AppCompatActivity
         View leftSpacer = parent.getChildAt(1);
         leftSpacer.setVisibility(View.GONE);
     }
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -410,10 +406,9 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
