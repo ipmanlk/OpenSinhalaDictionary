@@ -323,7 +323,7 @@ public class MainActivity extends AppCompatActivity
 
     private boolean checkLang() {
         //check input language
-        final String IS_ENGLISH_REGEX = "^[A-Za-z0-9- ]+$";
+        final String IS_ENGLISH_REGEX = "[a-zA-Z0-9\\-#\\.\\(\\)\\/%&\\s]{0,19}";
         return inputWord.matches(IS_ENGLISH_REGEX);
         //English - True, Sinhala-False
     }
