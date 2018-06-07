@@ -38,9 +38,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class MainActivity extends AppCompatActivity
 
@@ -57,10 +57,8 @@ public class MainActivity extends AppCompatActivity
     private EditText txtInput;
     private boolean suggest;
     private String inputWord;
-    private ArrayList<String> DBen2snEN = new ArrayList<String>();
-    private ArrayList<String> DBen2snSN = new ArrayList<String>();
-    private ArrayList<String> DBsn2enSN = new ArrayList<String>();
-    private ArrayList<String> DBsn2enEN = new ArrayList<String>();
+    private Map<String, String> DBen2sn = new TreeMap<String, String>();
+    private Map<String, String> DBsn2en = new TreeMap<String, String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,7 +161,7 @@ public class MainActivity extends AppCompatActivity
                     txtInput.setText(inputWord);
                     closeKeyboard();
                     readySearch();
-                    findMeaning();
+                    doSearch();
                     suggest=false;
 
                     //move cursor to the end of txtInput
@@ -204,7 +202,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View v) {
                closeKeyboard();
                readySearch();
-               findMeaning();
+                doSearch();
             }
         });
 
@@ -214,7 +212,7 @@ public class MainActivity extends AppCompatActivity
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if ( (actionId == EditorInfo.IME_ACTION_DONE) || ((event.getKeyCode() == KeyEvent.KEYCODE_ENTER) && (event.getAction() == KeyEvent.ACTION_DOWN ))) {
                     readySearch();
-                    findMeaning();
+                    doSearch();
                 }
 
                 return false;
@@ -223,6 +221,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void loadDB(){
+        //load db to maps
         readDB("db/en2sn.txt");
         readDB("db/sn2en.txt");
     }
@@ -233,15 +232,12 @@ public class MainActivity extends AppCompatActivity
             reader = new BufferedReader(new InputStreamReader(getAssets().open(db), "UTF-8"));
             String line = reader.readLine();
 
-
             while (line != null) {
                 String[] record = line.split("#");
                 if (db.equals("db/en2sn.txt")) {
-                    DBen2snEN.add(record[0]);
-                    DBen2snSN.add(record[1]);
+                    DBen2sn.put(record[0],record[1]);
                 } else {
-                    DBsn2enSN.add(record[0]);
-                    DBsn2enEN.add(record[1]);
+                    DBsn2en.put(record[0],record[1]);
                 }
                 line = reader.readLine();
             }
@@ -252,29 +248,27 @@ public class MainActivity extends AppCompatActivity
 
     private void suggestWords(){
         suggest=true;
+
+        if (checkLang()) { //if input is English
+            addSuggestions(DBen2sn);
+        } else { //if input is Sinhala
+            addSuggestions(DBsn2en);
+        }
+    }
+
+    private void addSuggestions(Map<String, String> DB){
+        //add suggestions to listview
         String suggestion="";
         int suggestions=0;
         int suggestionsLimit=8;
-        if (checkLang()) { //If input English
-            for (int i = 0; i < DBen2snEN.size(); i++) {
-                if(DBen2snEN.get(i).startsWith(inputWord)) {
-                    suggestions+=1;
-                    suggestion = DBen2snEN.get(i);
-                    meanings_list.add(suggestion);
-                    arrayAdapter.notifyDataSetChanged();
-                    if (suggestions==suggestionsLimit) {break;}
-                }
-            }
-        } else { //if input is Sinhala
-            System.out.println("me");
-            for (int i = 0; i < DBsn2enSN.size(); i++) {
-                if(DBsn2enSN.get(i).startsWith(inputWord)) {
-                    suggestions+=1;
-                    suggestion = DBsn2enSN.get(i);
-                    meanings_list.add(suggestion);
-                    arrayAdapter.notifyDataSetChanged();
-                    if (suggestions==suggestionsLimit) {break;}
-                }
+        for (String key : DB.keySet()) {
+            if (key.startsWith(inputWord)) {
+                System.out.println(key);
+                suggestions+=1;
+                suggestion=key;
+                meanings_list.add(suggestion);
+                arrayAdapter.notifyDataSetChanged();
+                if (suggestions==suggestionsLimit) {break;}
             }
         }
     }
@@ -288,37 +282,22 @@ public class MainActivity extends AppCompatActivity
         inputWord=inputWord.toLowerCase();
     }
 
-    private void findMeaning(){
+    private void doSearch(){
         String foundMeanings="";
         if (checkLang()) { //If input English
-            for (int i = 0; i < DBen2snEN.size(); i++) {
-                if(DBen2snEN.get(i).equals(inputWord)) {
-                    foundMeanings = DBen2snSN.get(i);
-                    found=true;
-                    break;
-                } else {
-                    found=false;
-                }
-            }
-        } else { //if input is Sinhala
-            for (int i = 0; i < DBsn2enSN.size(); i++) {
-                if(DBsn2enSN.get(i).equals(inputWord)) {
-                    foundMeanings = DBsn2enEN.get(i);
-                    found=true;
-                    break;
-                } else {
-                    found=false;
-                }
-            }
-        }
+            foundMeanings=DBen2sn.get(inputWord);
+            found = !isEmptyOrNull(foundMeanings);
 
+        } else { //if input is Sinhala
+            foundMeanings=DBsn2en.get(inputWord);
+            found = !isEmptyOrNull(foundMeanings);
+        }
         //if found
         if (found) {
             showMeanings(foundMeanings);
         } else {
             notFound();
         }
-
     }
 
     private boolean checkLang() {
