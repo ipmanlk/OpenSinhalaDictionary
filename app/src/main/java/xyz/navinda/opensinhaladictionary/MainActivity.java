@@ -200,8 +200,8 @@ public class MainActivity extends AppCompatActivity
         btnFind.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               closeKeyboard();
-               readySearch();
+                closeKeyboard();
+                readySearch();
                 doSearch();
             }
         });
@@ -285,14 +285,21 @@ public class MainActivity extends AppCompatActivity
     private void doSearch(){
         String foundMeanings="";
         if (checkLang()) { //If input English
-            foundMeanings=DBen2sn.get(inputWord);
-            found = !isEmptyOrNull(foundMeanings);
-
+            if (DBen2sn.containsKey(inputWord)) {
+                foundMeanings=DBen2sn.get(inputWord);
+                found=true;
+            } else {
+                found=false;
+            }
         } else { //if input is Sinhala
-            foundMeanings=DBsn2en.get(inputWord);
-            found = !isEmptyOrNull(foundMeanings);
+            if (DBsn2en.containsKey(inputWord)) {
+                foundMeanings=DBsn2en.get(inputWord);
+                found=true;
+            } else {
+                found=false;
+            }
         }
-        //if found
+
         if (found) {
             showMeanings(foundMeanings);
         } else {
