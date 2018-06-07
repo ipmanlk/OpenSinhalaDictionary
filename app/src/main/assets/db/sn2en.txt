@@ -1,4 +1,5 @@
-﻿අධිශෝෂක#adsorbent
+﻿osd#sn2en
+අධිශෝෂක#adsorbent
 ඉතා පුරාණ#prehistoric
 නඩුභ්‍රංශනීය#barratrous
 නිවට#lowly
@@ -12,7 +13,6 @@ x ලකුණ#circumfle
 ද්වෙෂ කරනවා#bominate
 16 පාදයේ සංඛ්‍යා#hexadecimal
 2-ගස#2-tree
-dict.cn#ensitip-group
 EXOR-ද්වාරය#EXOR
 E-ග්‍රහයා#s-plane
 E-තලය#s-plane
