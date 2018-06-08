@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity
 
         //Get buttons and input text reference
         txtInput = findViewById(R.id.txtInput);
-        txtInput.setIconified(false);
+        txtInput.setIconifiedByDefault(false);
         txtInput.clearFocus();
 
         //Lister for search view
