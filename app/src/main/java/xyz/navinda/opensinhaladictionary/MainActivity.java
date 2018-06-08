@@ -277,8 +277,6 @@ public class MainActivity extends AppCompatActivity
             notFoundMsg="Definition for '" + inputWord + "' is not included in our database at the moment.";
             clearMeanings();
             suggest=false;
-            meanings_list.add(notFoundMsg);
-            arrayAdapter.notifyDataSetChanged();
             showAlertDialogBox("Sorry!",notFoundMsg,"Ok",Gravity.NO_GRAVITY);
         }
     }
@@ -286,8 +284,6 @@ public class MainActivity extends AppCompatActivity
     private boolean checkInput() {
         if (isEmptyOrNull(inputWord)) {
             clearMeanings();
-            meanings_list.add("Please enter a word to search.");
-            arrayAdapter.notifyDataSetChanged();
             showAlertDialogBox("Sorry!","Please enter a word to search.","Ok",Gravity.NO_GRAVITY);
             return false;
         } else {
