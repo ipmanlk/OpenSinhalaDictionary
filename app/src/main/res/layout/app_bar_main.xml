@@ -20,11 +20,12 @@
 
         <android.support.v7.widget.SearchView
             android:id="@+id/txtInput"
-            app:theme="@style/DicSearchView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="55dp"
+            android:background="@drawable/search_view"
             android:queryHint="Type here...."
-            android:showAsAction="always" />
+            android:showAsAction="always"
+            app:theme="@style/DicSearchView" />
         
     </android.support.design.widget.AppBarLayout>
 
