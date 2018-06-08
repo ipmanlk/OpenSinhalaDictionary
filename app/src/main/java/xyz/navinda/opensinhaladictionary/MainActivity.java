@@ -276,6 +276,7 @@ public class MainActivity extends AppCompatActivity
             String notFoundMsg;
             notFoundMsg="Definition for '" + inputWord + "' is not included in our database at the moment.";
             clearMeanings();
+            suggest=false;
             meanings_list.add(notFoundMsg);
             arrayAdapter.notifyDataSetChanged();
             showAlertDialogBox("Sorry!",notFoundMsg,"Ok",Gravity.NO_GRAVITY);
