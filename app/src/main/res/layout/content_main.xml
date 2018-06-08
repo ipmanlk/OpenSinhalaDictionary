@@ -9,19 +9,11 @@
     tools:showIn="@layout/app_bar_main"
     android:orientation="vertical" >
 
-        <android.support.v7.widget.SearchView
-            android:id="@+id/txtInput"
-            app:theme="@style/DicSearchView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:queryHint="Type here...."
-            android:layout_marginTop="7dp"
-            android:layout_marginBottom="15dp"/>
-
         <ListView
             android:id="@+id/listOutput"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginTop="15dp"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="0dp" />
 
