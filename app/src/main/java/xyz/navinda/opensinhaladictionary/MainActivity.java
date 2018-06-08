@@ -10,11 +10,8 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -24,12 +21,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -42,6 +37,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import android.support.v7.widget.SearchView;
 
 public class MainActivity extends AppCompatActivity
 
@@ -50,7 +46,7 @@ public class MainActivity extends AppCompatActivity
     private List<String> meanings_list;
     private ArrayAdapter<String> arrayAdapter;
     private Uri url;
-    private EditText txtInput;
+    private SearchView txtInput;
     private boolean suggest;
     private String inputWord;
     private Map<String, String> DBen2sn = new TreeMap<String, String>();
@@ -155,64 +151,40 @@ public class MainActivity extends AppCompatActivity
                 //if user select a suggestion
                 if (suggest) {
                     inputWord=selectedWord;
-                    txtInput.setText(inputWord);
+                    txtInput.setQuery(inputWord, false);
                     closeKeyboard();
                     readyInput();
                     doSearch();
                     suggest=false;
-
-                    //move cursor to the end of txtInput
-                    txtInput.setSelection(txtInput.getText().length());
                 }
             }
         });
 
         //Get buttons and input text reference
-        final Button btnFind = findViewById(R.id.btnFind);
         txtInput = findViewById(R.id.txtInput);
+        txtInput.setIconified(false);
+        txtInput.clearFocus();
 
-        //Lister for edit text
-        txtInput.addTextChangedListener(new TextWatcher() {
+        //Lister for search view
+        txtInput.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
-            public void afterTextChanged(Editable s) {}
-
-            public void beforeTextChanged(CharSequence s, int start,
-                                          int count, int after) {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                //when user hits return key
+                readyInput();
+                if (checkInput()) {
+                    doSearch();
+                }
+                return false;
             }
 
-            public void onTextChanged(CharSequence s, int start,
-                                      int before, int count) {
+            @Override
+            public boolean onQueryTextChange(String newText) {
                 clearMeanings();
                 readyInput();
                 if (!isEmptyOrNull(inputWord)) {
                     suggestWords();
                 }
-            }
-        });
-
-        //On click even for search button
-        btnFind.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                closeKeyboard();
-                readyInput();
-                if (checkInput()) {
-                    doSearch();
-                }
-            }
-        });
-
-        //when user hits return key on editText
-        txtInput.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if ( (actionId == EditorInfo.IME_ACTION_DONE) || ((event.getKeyCode() == KeyEvent.KEYCODE_ENTER) && (event.getAction() == KeyEvent.ACTION_DOWN ))) {
-                    readyInput();
-                    if (checkInput()) {
-                        doSearch();
-                    }
-                }
-
                 return false;
             }
         });
@@ -261,7 +233,6 @@ public class MainActivity extends AppCompatActivity
         int suggestionsLimit=8;
         for (String key : DB.keySet()) {
             if (key.startsWith(inputWord)) {
-                System.out.println(key);
                 suggestions+=1;
                 suggestion=key;
                 meanings_list.add(suggestion);
@@ -273,7 +244,7 @@ public class MainActivity extends AppCompatActivity
 
     private void readyInput() {
         //get input word
-        inputWord=txtInput.getText().toString();
+        inputWord=txtInput.getQuery().toString();
 
         //Remove spaces in input word and change case to lower
         inputWord=inputWord.trim();

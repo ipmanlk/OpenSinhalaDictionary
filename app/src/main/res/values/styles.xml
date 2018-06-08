@@ -24,4 +24,8 @@
         <item name="android:windowBackground">@drawable/background_splash</item>
     </style>
 
+    <style name="DicSearchView" parent="Widget.AppCompat.SearchView" >
+        <item name="android:textSize">20dp</item>
+    </style>
+
 </resources>
