@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity
                     inputWord=selectedWord;
                     txtInput.setText(inputWord);
                     closeKeyboard();
-                    readySearch();
+                    readyInput();
                     doSearch();
                     suggest=false;
 
@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity
             public void onTextChanged(CharSequence s, int start,
                                       int before, int count) {
                 clearMeanings();
-                readySearch();
+                readyInput();
                 if (!isEmptyOrNull(inputWord)) {
                     suggestWords();
                 }
@@ -195,8 +195,10 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 closeKeyboard();
-                readySearch();
-                doSearch();
+                readyInput();
+                if (checkInput()) {
+                    doSearch();
+                }
             }
         });
 
@@ -205,8 +207,10 @@ public class MainActivity extends AppCompatActivity
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if ( (actionId == EditorInfo.IME_ACTION_DONE) || ((event.getKeyCode() == KeyEvent.KEYCODE_ENTER) && (event.getAction() == KeyEvent.ACTION_DOWN ))) {
-                    readySearch();
-                    doSearch();
+                    readyInput();
+                    if (checkInput()) {
+                        doSearch();
+                    }
                 }
 
                 return false;
@@ -267,7 +271,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void readySearch() {
+    private void readyInput() {
         //get input word
         inputWord=txtInput.getText().toString();
 
@@ -298,7 +302,24 @@ public class MainActivity extends AppCompatActivity
         if (found) {
             showMeanings(foundMeanings);
         } else {
-            notFound();
+            String notFoundMsg;
+            notFoundMsg="Definition for '" + inputWord + "' is not included in our database at the moment.";
+            clearMeanings();
+            meanings_list.add(notFoundMsg);
+            arrayAdapter.notifyDataSetChanged();
+            showAlertDialogBox("Sorry!",notFoundMsg,"Ok",Gravity.NO_GRAVITY);
+        }
+    }
+
+    private boolean checkInput() {
+        if (isEmptyOrNull(inputWord)) {
+            clearMeanings();
+            meanings_list.add("Please enter a word to search.");
+            arrayAdapter.notifyDataSetChanged();
+            showAlertDialogBox("Sorry!","Please enter a word to search.","Ok",Gravity.NO_GRAVITY);
+            return false;
+        } else {
+            return true;
         }
     }
 
@@ -307,20 +328,6 @@ public class MainActivity extends AppCompatActivity
         final String IS_ENGLISH_REGEX = "[a-zA-Z0-9\\-#\\.\\(\\)\\/%&\\s]{0,19}";
         return inputWord.matches(IS_ENGLISH_REGEX);
         //English - True, Sinhala-False
-    }
-
-    private void notFound(){
-        String notFoundMsg;
-        if(!isEmptyOrNull(inputWord)) {
-            notFoundMsg="Definition for '" + inputWord + "' is not included in our database at the moment.";
-        } else {
-            notFoundMsg="Please enter a word to search.";
-        }
-
-        clearMeanings();
-        meanings_list.add(notFoundMsg);
-        arrayAdapter.notifyDataSetChanged();
-        showAlertDialogBox("Sorry!",notFoundMsg,"Ok",Gravity.NO_GRAVITY);
     }
 
     private boolean isEmptyOrNull(String input){
