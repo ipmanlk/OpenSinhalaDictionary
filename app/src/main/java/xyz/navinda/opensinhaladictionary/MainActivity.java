@@ -172,9 +172,7 @@ public class MainActivity extends AppCompatActivity
             public boolean onQueryTextSubmit(String query) {
                 //when user hits return key
                 readyInput();
-                if (checkInput()) {
-                    doSearch();
-                }
+                doSearch();
                 return false;
             }
 
@@ -278,16 +276,6 @@ public class MainActivity extends AppCompatActivity
             clearMeanings();
             suggest=false;
             showAlertDialogBox("Sorry!",notFoundMsg,"Ok",Gravity.NO_GRAVITY);
-        }
-    }
-
-    private boolean checkInput() {
-        if (isEmptyOrNull(inputWord)) {
-            clearMeanings();
-            showAlertDialogBox("Sorry!","Please enter a word to search.","Ok",Gravity.NO_GRAVITY);
-            return false;
-        } else {
-            return true;
         }
     }
 
