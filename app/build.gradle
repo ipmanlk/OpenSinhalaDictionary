@@ -7,8 +7,8 @@ android {
         applicationId "xyz.navinda.opensinhaladictionary"
         minSdkVersion 14
         targetSdkVersion 26
-        versionCode 4
-        versionName "1.2.0"
+        versionCode 5
+        versionName "1.4.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
