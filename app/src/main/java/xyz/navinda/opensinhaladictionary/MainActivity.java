@@ -377,6 +377,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             url = Uri.parse("https://github.com/ipman98/OpenSinhalaDictionary");
             Intent intent = new Intent(Intent.ACTION_VIEW, url);
             startActivity(intent);
+        } else if (id == R.id.nav_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
         } else {
             showAlertDialogBox("About","Developed By Navinda Dissanayake.\n\nwww.navinda.xyz","Visit My Site", Gravity.CENTER);
         }

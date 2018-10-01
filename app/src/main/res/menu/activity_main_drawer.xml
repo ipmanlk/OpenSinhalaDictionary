@@ -3,7 +3,7 @@
 
 
     <group>
-        <item android:title="Information">
+        <item android:title="Main">
             <menu>
                 <item
                     android:id="@+id/nav_online"
@@ -13,6 +13,10 @@
                     android:id="@+id/nav_help"
                     android:icon="@drawable/help"
                     android:title="Help" />
+                <item
+                    android:id="@+id/nav_settings"
+                    android:icon="@drawable/settings"
+                    android:title="Settings" />
             </menu>
         </item>
     </group>
