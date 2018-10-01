@@ -1,8 +1,7 @@
 package xyz.navinda.opensinhaladictionary;
 
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -39,11 +38,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import android.support.v7.widget.SearchView;
 
-public class MainActivity extends AppCompatActivity
-
-        implements NavigationView.OnNavigationItemSelectedListener {
-    private Typeface mTypeface;
-    private List<String> meanings_list;
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    private List<String> meaningsList;
     private ArrayAdapter<String> arrayAdapter;
     private Uri url;
     private SearchView txtInput;
@@ -56,19 +52,19 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        //Load db to array
+        //Load db to maps
         loadDB();
 
         //Close keyboard when drawer open
@@ -96,23 +92,19 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        // Get the application context
-        Context mContext = getApplicationContext();
-        Activity mActivity = MainActivity.this;
-
         // Get the widget reference from XML layout
         ListView mListView = (ListView) findViewById(R.id.listOutput);
 
         // Initialize a typeface (custom font)
-        mTypeface  = Typeface.createFromAsset(getAssets(),"font/malithi_web.ttf");
+        final Typeface mTypeface  = Typeface.createFromAsset(getAssets(),"font/malithi_web.ttf");
 
         //Array for meanings
         String[] meanings = new String[]{};
-        meanings_list = new ArrayList<String>(Arrays.asList(meanings));
+        meaningsList = new ArrayList<String>(Arrays.asList(meanings));
 
         //Create array adapter
         arrayAdapter = new ArrayAdapter<String>
-                (this, android.R.layout.simple_list_item_1, meanings_list) {
+                (this, android.R.layout.simple_list_item_1, meaningsList) {
             @NonNull
             @Override
             public View getView(int position, View convertView, @NonNull ViewGroup parent){
@@ -233,7 +225,7 @@ public class MainActivity extends AppCompatActivity
             if (key.startsWith(inputWord)) {
                 suggestions+=1;
                 suggestion=key;
-                meanings_list.add(suggestion);
+                meaningsList.add(suggestion);
                 arrayAdapter.notifyDataSetChanged();
                 if (suggestions==suggestionsLimit) {break;}
             }
@@ -287,29 +279,25 @@ public class MainActivity extends AppCompatActivity
     }
 
     private boolean isEmptyOrNull(String input){
-        if (inputWord == null || inputWord.isEmpty()){
-            return true;
-        } else {
-            return false;
-        }
+        return inputWord == null || inputWord.isEmpty();
     }
 
     private void showMeanings(String resultWords){
         resultWords=resultWords.trim(); //remove spaces
         String[] result=resultWords.split("@"); //seperate meanings by @
         clearMeanings(); //clear output list box
-        //add meanings one by one
-        meanings_list.addAll(Arrays.asList(result));
+        //add meanings to list
+        meaningsList.addAll(Arrays.asList(result));
         arrayAdapter.notifyDataSetChanged();
     }
 
     private void clearMeanings(){
         //clear outputbox
-        meanings_list.clear();
+        meaningsList.clear();
         arrayAdapter.notifyDataSetChanged();
     }
 
-    private void showAlertDialogBox(final String titleTxt, String msg, String btnTxt, int TxtAlign) {
+    private void showAlertDialogBox(final String titleTxt, String msg, String btnTxt, int txtAlign) {
 
         AlertDialog ad = new AlertDialog.Builder(this).create();
         ad.setCancelable(false); // This blocks the 'BACK' button
@@ -348,7 +336,7 @@ public class MainActivity extends AppCompatActivity
 
         //Alignment for alert box body msg
         TextView messageView = ad.findViewById(android.R.id.message);
-        messageView.setGravity(TxtAlign);
+        messageView.setGravity(txtAlign);
 
         //Center alert box ok button
         Button customButton = ad.getButton(AlertDialog.BUTTON_POSITIVE);
@@ -398,6 +386,7 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    @SuppressLint("IntentReset")
     protected void sendEmail() {
         //Send mail to bug report
         String[] TO = {"navilk@zoho.com"};
