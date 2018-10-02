@@ -45,8 +45,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private SearchView txtInput;
     private boolean suggest;
     private String inputWord;
-    private Map<String, String> DBen2sn = new TreeMap<String, String>();
-    private Map<String, String> DBsn2en = new TreeMap<String, String>();
+    private Map<String, String> DBen2sn = new TreeMap<>();
+    private Map<String, String> DBsn2en = new TreeMap<>();
     private HandleSettings settings;
 
     @Override
@@ -97,14 +97,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         // Get the widget reference from XML layout
-        ListView mListView = (ListView) findViewById(R.id.listOutput);
+        ListView mListView = findViewById(R.id.listOutput);
 
         // Initialize a typeface (custom font)
         final Typeface mTypeface  = Typeface.createFromAsset(getAssets(),"font/malithi_web.ttf");
 
         //Array for meanings
         String[] meanings = new String[]{};
-        meaningsList = new ArrayList<String>(Arrays.asList(meanings));
+        meaningsList = new ArrayList<>(Arrays.asList(meanings));
 
         //Create array adapter
         arrayAdapter = new ArrayAdapter<String>
@@ -247,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void doSearch(){
         String foundMeanings="";
-        Boolean found = false;
+        Boolean found;
         if (checkLang()) { //If input English
             if (DBen2sn.containsKey(inputWord)) {
                 foundMeanings=DBen2sn.get(inputWord);
@@ -283,7 +283,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private boolean isEmptyOrNull(String input){
-        return inputWord == null || inputWord.isEmpty();
+        return input == null || input.isEmpty();
     }
 
     private void showMeanings(String resultWords){
