@@ -1,9 +1,16 @@
 package xyz.navinda.opensinhaladictionary;
 
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+
+import java.io.File;
+
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -19,5 +26,35 @@ public class SettingsActivity extends AppCompatActivity {
         }catch(NullPointerException e){
             Log.e("SearchActivity Toolbar", "You have got a NULL POINTER EXCEPTION");
         }
+
+        // Get the widget references from XML layout
+        final Button saveBtn = findViewById(R.id.btnSave);
+        final EditText txtSuggestionsLimit = findViewById(R.id.txtSuggestionsLimit);
+        final EditText txtFontSize = findViewById(R.id.txtFontSize);
+
+        //get existing settings
+        SharedPreferences settings = getSharedPreferences("Settings", MODE_PRIVATE);
+
+        if (settings.contains("fontSize")) {
+          String suggestionsLimit = settings.getString("suggestionsLimit",null);
+          String fontSize = settings.getString("fontSize", null);
+          txtSuggestionsLimit.setText(suggestionsLimit);
+          txtFontSize.setText(fontSize);
+        }
+
+        //when click save button
+        saveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //save settings in shared preferences
+                SharedPreferences.Editor editor = getSharedPreferences("Settings", MODE_PRIVATE).edit();
+
+                editor.putString("suggestionsLimit",txtSuggestionsLimit.getText().toString());
+                editor.putString("fontSize", txtFontSize.getText().toString());
+                editor.apply();
+            }
+        });
+
     }
+
 }
