@@ -43,6 +43,7 @@
         android:layout_marginRight="5dp"
         android:ems="10"
         android:inputType="number"
+        android:maxLength="3"
         android:text="8" />
 
     <TextView
@@ -62,6 +63,7 @@
         android:layout_marginRight="5dp"
         android:ems="10"
         android:inputType="number"
+        android:maxLength="2"
         android:text="24" />
 
     <Button
