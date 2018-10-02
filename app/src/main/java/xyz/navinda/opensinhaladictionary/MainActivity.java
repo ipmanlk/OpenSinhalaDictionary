@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private String inputWord;
     private Map<String, String> DBen2sn = new TreeMap<String, String>();
     private Map<String, String> DBsn2en = new TreeMap<String, String>();
+    private HandleSettings settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +67,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //Load db to maps
         loadDB();
+
+        //create settings object
+        settings = new HandleSettings(getSharedPreferences("Settings", MODE_PRIVATE));
 
         //Close keyboard when drawer open
         drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
@@ -121,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //item.setTypeface(item.getTypeface(), Typeface.BOLD);
 
                 // Change the item text size
-                item.setTextSize(TypedValue.COMPLEX_UNIT_DIP,24);
+                item.setTextSize(TypedValue.COMPLEX_UNIT_DIP,settings.getFontSize());
 
                 // return the view
                 return item;
@@ -220,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //add suggestions to listview
         String suggestion="";
         int suggestions=0;
-        int suggestionsLimit=8;
+        int suggestionsLimit=settings.getSuggestionsLimit();
         for (String key : DB.keySet()) {
             if (key.startsWith(inputWord)) {
                 suggestions+=1;
