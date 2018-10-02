@@ -25,6 +25,7 @@
             android:layout_height="55dp"
             android:queryHint="Type here...."
             android:showAsAction="always"
+            android:layout_marginBottom="1dp"
             app:theme="@style/DicSearchView" />
         
     </android.support.design.widget.AppBarLayout>
