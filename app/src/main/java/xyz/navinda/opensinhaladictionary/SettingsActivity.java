@@ -1,5 +1,6 @@
 package xyz.navinda.opensinhaladictionary;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -44,6 +45,8 @@ public class SettingsActivity extends AppCompatActivity {
                 editor.putString("suggestionsLimit",txtSuggestionsLimit.getText().toString());
                 editor.putString("fontSize", txtFontSize.getText().toString());
                 editor.apply();
+                //end activity
+                finish();
             }
         });
 
