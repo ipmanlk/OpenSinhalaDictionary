@@ -9,9 +9,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import java.io.File;
-
-
 public class SettingsActivity extends AppCompatActivity {
 
     @Override
@@ -33,14 +30,9 @@ public class SettingsActivity extends AppCompatActivity {
         final EditText txtFontSize = findViewById(R.id.txtFontSize);
 
         //get existing settings
-        SharedPreferences settings = getSharedPreferences("Settings", MODE_PRIVATE);
-
-        if (settings.contains("fontSize")) {
-          String suggestionsLimit = settings.getString("suggestionsLimit",null);
-          String fontSize = settings.getString("fontSize", null);
-          txtSuggestionsLimit.setText(suggestionsLimit);
-          txtFontSize.setText(fontSize);
-        }
+        HandleSettings settings = new HandleSettings(getSharedPreferences("Settings", MODE_PRIVATE));
+        txtFontSize.setText(String.valueOf(settings.getFontSize()));
+        txtSuggestionsLimit.setText(String.valueOf(settings.getSuggestionsLimit()));
 
         //when click save button
         saveBtn.setOnClickListener(new View.OnClickListener() {
