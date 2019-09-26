@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:context=".SettingsActivity"
+        android:orientation="vertical" >
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/settingsToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:popupTheme="@style/AppTheme.PopupOverlay"
+        app:subtitle="Settings"
+        app:subtitleTextColor="@color/colorWhite"
+        app:title="Open Sinhala Dictionary"
+        app:titleTextColor="@color/colorWhite" />
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="match_parent"
+        android:layout_height="186dp"
+        android:layout_marginTop="20dp"
+        app:srcCompat="@drawable/settings_logo" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:text="Suggestions Limit" />
+
+    <EditText
+        android:id="@+id/txtSuggestionsLimit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:ems="10"
+        android:inputType="number"
+        android:maxLength="3"
+        android:text="8" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:text="Font Size (Meanings)" />
+
+    <EditText
+        android:id="@+id/txtFontSize"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:ems="10"
+        android:inputType="number"
+        android:maxLength="2"
+        android:text="24" />
+
+    <Button
+        android:id="@+id/btnSave"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="5dp"
+        android:text="Save" />
+</LinearLayout>
