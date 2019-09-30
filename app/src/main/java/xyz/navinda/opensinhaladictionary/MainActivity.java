@@ -2,6 +2,7 @@ package xyz.navinda.opensinhaladictionary;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -28,15 +29,20 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.io.BufferedReader;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
 import android.support.v7.widget.SearchView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private List<String> meaningsList;
@@ -45,8 +51,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private SearchView txtInput;
     private boolean suggest;
     private String inputWord;
-    private Map<String, String> DBen2sn = new TreeMap<>();
-    private Map<String, String> DBsn2en = new TreeMap<>();
+    private Map<String, String[]> DBen2sn = new TreeMap<>();
+    private Map<String, String[]> DBsn2en = new TreeMap<>();
     private HandleSettings settings;
 
     @Override
@@ -65,13 +71,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        //Load db to maps
+        // Load db to maps
         loadDB();
 
-        //create settings object
+        // create settings object
         settings = new HandleSettings(getSharedPreferences("Settings", MODE_PRIVATE));
 
-        //Close keyboard when drawer open
+        // Close keyboard when drawer open
         drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
 
             @Override
@@ -100,20 +106,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ListView mListView = findViewById(R.id.listOutput);
 
         // Initialize a typeface (custom font)
-        final Typeface mTypeface  = Typeface.createFromAsset(getAssets(),"font/malithi_web.ttf");
+        final Typeface mTypeface = Typeface.createFromAsset(getAssets(), "font/malithi_web.ttf");
 
-        //Array for meanings
+        // Array for meanings
         String[] meanings = new String[]{};
         meaningsList = new ArrayList<>(Arrays.asList(meanings));
 
-        //Create array adapter
+        // Create array adapter
         arrayAdapter = new ArrayAdapter<String>
                 (this, android.R.layout.simple_list_item_1, meaningsList) {
             @NonNull
             @Override
-            public View getView(int position, View convertView, @NonNull ViewGroup parent){
+            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
                 // Cast the list view each item as text view
-                TextView item = (TextView) super.getView(position,convertView,parent);
+                TextView item = (TextView) super.getView(position, convertView, parent);
 
                 // Set the typeface/font for the current item
                 item.setTypeface(mTypeface);
@@ -125,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //item.setTypeface(item.getTypeface(), Typeface.BOLD);
 
                 // Change the item text size
-                item.setTextSize(TypedValue.COMPLEX_UNIT_DIP,settings.getFontSize());
+                item.setTextSize(TypedValue.COMPLEX_UNIT_DIP, settings.getFontSize());
 
                 // return the view
                 return item;
@@ -136,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mListView.setAdapter(arrayAdapter);
 
         //Listview onclick
-        suggest=false;
+        suggest = false;
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -146,12 +152,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 //if user select a suggestion
                 if (suggest) {
-                    inputWord=selectedWord;
+                    inputWord = selectedWord;
                     txtInput.setQuery(inputWord, false);
                     closeKeyboard();
                     readyInput();
                     doSearch();
-                    suggest=false;
+                    suggest = false;
                 }
             }
         });
@@ -184,34 +190,48 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    private void loadDB(){
-        //load db to maps
-        readDB("db/en2sn.txt");
-        readDB("db/sn2en.txt");
+    private void loadDB() {
+        // load db to tree maps
+        readDB("db/en2sn.json");
+        readDB("db/sn2en.json");
     }
 
-    private void readDB(String db) {
-        BufferedReader reader;
-        try {
-            reader = new BufferedReader(new InputStreamReader(getAssets().open(db), "UTF-8"));
-            String line = reader.readLine();
+    private void readDB(String filename) {
+        JSONObject obj = null;
 
-            while (line != null) {
-                String[] record = line.split("#");
-                if (db.equals("db/en2sn.txt")) {
-                    DBen2sn.put(record[0],record[1]);
+        // get json string and create an new JSONObject
+        try {
+            obj = new JSONObject(loadJSONFromAssets(this, filename));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        // get keys in the JSON object
+        JSONArray keys = obj.names();
+
+        // loop through JSONObject and store key values relevant tree map
+        for (int i = 0; i < keys.length(); ++i) {
+
+            String key, str;
+            try {
+                key = keys.getString(i);
+                str = obj.getString(key);
+                String[] value = (str.substring(1, str.indexOf("]")).replace("\"", "")).split(",");
+
+                if (filename.contains("en2sn")) {
+                    DBen2sn.put(key, value);
                 } else {
-                    DBsn2en.put(record[0],record[1]);
+                    DBsn2en.put(key, value);
                 }
-                line = reader.readLine();
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
+
         }
     }
 
-    private void suggestWords(){
-        suggest=true;
+    private void suggestWords() {
+        suggest = true;
 
         if (checkLang()) { //if input is English
             addSuggestions(DBen2sn);
@@ -220,47 +240,49 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void addSuggestions(Map<String, String> DB){
+    private void addSuggestions(Map<String, String[]> DB) {
         //add suggestions to listview
-        String suggestion="";
-        int suggestions=0;
-        int suggestionsLimit=settings.getSuggestionsLimit();
+        String suggestion = "";
+        int suggestions = 0;
+        int suggestionsLimit = settings.getSuggestionsLimit();
         for (String key : DB.keySet()) {
             if (key.startsWith(inputWord)) {
-                suggestions+=1;
-                suggestion=key;
+                suggestions += 1;
+                suggestion = key;
                 meaningsList.add(suggestion);
                 arrayAdapter.notifyDataSetChanged();
-                if (suggestions==suggestionsLimit) {break;}
+                if (suggestions == suggestionsLimit) {
+                    break;
+                }
             }
         }
     }
 
     private void readyInput() {
         //get input word
-        inputWord=txtInput.getQuery().toString();
+        inputWord = txtInput.getQuery().toString();
 
         //Remove spaces in input word and change case to lower
-        inputWord=inputWord.trim();
-        inputWord=inputWord.toLowerCase();
+        inputWord = inputWord.trim();
+        inputWord = inputWord.toLowerCase();
     }
 
-    private void doSearch(){
-        String foundMeanings="";
+    private void doSearch() {
+        String[] foundMeanings = new String[0];
         Boolean found;
         if (checkLang()) { //If input English
             if (DBen2sn.containsKey(inputWord)) {
-                foundMeanings=DBen2sn.get(inputWord);
-                found =true;
+                foundMeanings = DBen2sn.get(inputWord);
+                found = true;
             } else {
-                found =false;
+                found = false;
             }
         } else { //if input is Sinhala
             if (DBsn2en.containsKey(inputWord)) {
-                foundMeanings=DBsn2en.get(inputWord);
-                found =true;
+                foundMeanings = DBsn2en.get(inputWord);
+                found = true;
             } else {
-                found =false;
+                found = false;
             }
         }
 
@@ -268,10 +290,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             showMeanings(foundMeanings);
         } else {
             String notFoundMsg;
-            notFoundMsg="Definition for '" + inputWord + "' is not included in our database at the moment.";
+            notFoundMsg = "Definition for '" + inputWord + "' is not included in our database at the moment.";
             clearMeanings();
-            suggest=false;
-            showAlertDialogBox("Sorry!",notFoundMsg,"Ok",Gravity.NO_GRAVITY);
+            suggest = false;
+            showAlertDialogBox("Sorry!", notFoundMsg, "Ok", Gravity.NO_GRAVITY);
         }
     }
 
@@ -282,20 +304,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //English - True, Sinhala-False
     }
 
-    private boolean isEmptyOrNull(String input){
+    private boolean isEmptyOrNull(String input) {
         return input == null || input.isEmpty();
     }
 
-    private void showMeanings(String resultWords){
-        resultWords=resultWords.trim(); //remove spaces
-        String[] result=resultWords.split("@"); //seperate meanings by @
+    private void showMeanings(String[] defs) {
         clearMeanings(); //clear output list box
         //add meanings to list
-        meaningsList.addAll(Arrays.asList(result));
+        meaningsList.addAll(Arrays.asList(defs));
         arrayAdapter.notifyDataSetChanged();
     }
 
-    private void clearMeanings(){
+    private void clearMeanings() {
         //clear outputbox
         meaningsList.clear();
         arrayAdapter.notifyDataSetChanged();
@@ -372,11 +392,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent(Intent.ACTION_VIEW, url);
             startActivity(intent);
         } else if (id == R.id.nav_help) {
-            showAlertDialogBox("Help","Just type the word you want to search & press the search button. \n\nNote : OSD will detect your input language automatically.","Close",Gravity.NO_GRAVITY);
+            showAlertDialogBox("Help", "Just type the word you want to search & press the search button. \n\nNote : OSD will detect your input language automatically.", "Close", Gravity.NO_GRAVITY);
         } else if (id == R.id.nav_share) {
             shareApp();
         } else if (id == R.id.nav_report) {
-            showAlertDialogBox("Report Bugs","This built-in feature is still under construction.\n\nIf you find any bugs, please be kind enough to inform me by sending an email to navilk@zoho.com.","Report",Gravity.NO_GRAVITY);
+            showAlertDialogBox("Report Bugs", "This built-in feature is still under construction.\n\nIf you find any bugs, please be kind enough to inform me by sending an email to navilk@zoho.com.", "Report", Gravity.NO_GRAVITY);
         } else if (id == R.id.nav_source) {
             url = Uri.parse("https://github.com/ipman98/OpenSinhalaDictionary");
             Intent intent = new Intent(Intent.ACTION_VIEW, url);
@@ -385,7 +405,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
         } else {
-            showAlertDialogBox("About","Developed By Navinda Dissanayake.\n\nwww.navinda.xyz","Visit My Site", Gravity.CENTER);
+            showAlertDialogBox("About", "Developed By Navinda Dissanayake.\n\nwww.navinda.xyz", "Visit My Site", Gravity.CENTER);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -415,20 +435,37 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void closeKeyboard(){
+    private void closeKeyboard() {
         try {
-            InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+            InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
         } catch (Exception e) {
             // TODO: handle exception
         }
     }
 
-    private void shareApp(){
+    private void shareApp() {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, "Try out Open Sinhala Dictionary!. It's an ad-free, open-source English-Sinhala dictionary for Android & Windows.");
         sendIntent.setType("text/plain");
         startActivity(sendIntent);
+    }
+
+    public String loadJSONFromAssets(Context context, String filename) {
+        String json = null;
+        try {
+            InputStream is = context.getAssets().open(filename);
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return json;
     }
 }
